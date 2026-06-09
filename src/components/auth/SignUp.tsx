@@ -59,7 +59,7 @@ const SignUp = () => {
       if (role === 'hirer') { body.firstName = form.firstName; body.lastName = form.lastName; }
       else { body.businessName = form.businessName; }
 
-      const res = await fetch(`${API}/users`, {
+      const res = await fetch(`${API}/api/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
