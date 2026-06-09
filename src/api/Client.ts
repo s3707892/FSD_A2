@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3002/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://fsd-a2-6gnarblof-cory-s-projects7.vercel.app',
 });
 
 // Attach JWT token to every request if one is stored
