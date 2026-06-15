@@ -1,3 +1,4 @@
+// represents a registered user with their role and linked venues
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Venue } from './Venue';
 

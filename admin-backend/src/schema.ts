@@ -1,3 +1,4 @@
+// defines all graphql types, queries and mutations for the admin api
 import { gql } from 'apollo-server-express';
 
 export const typeDefs = gql`

@@ -1,3 +1,4 @@
+// tracks which venues a hirer has shortlisted and their ranking order
 import { Entity, Index, Column, BaseEntity, ManyToOne, PrimaryColumn, JoinColumn } from "typeorm"
 import { Venue } from "./Venue"
 import { User } from "./User"

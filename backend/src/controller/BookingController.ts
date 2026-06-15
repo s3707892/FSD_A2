@@ -1,3 +1,4 @@
+// handles creating, fetching, updating and reviewing bookings
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Booking } from "../entity/Booking";
@@ -10,6 +11,7 @@ const statusRepo = () => AppDataSource.getRepository(BookingStatus);
 const reviewRepo = () => AppDataSource.getRepository(Review);
 const venueRepo = () => AppDataSource.getRepository(Venue);
 
+// convert a filter string like week or month into a start and end date range
 const getDateRange = (filter: string): { start: Date; end: Date } => {
     const now = new Date();
     switch (filter) {
@@ -27,6 +29,7 @@ const getDateRange = (filter: string): { start: Date; end: Date } => {
             const end = new Date(now.getFullYear(), now.getMonth(), 0);
             return { start, end };
         }
+        // default to all time if no filter is given
         default:
             return { start: new Date(0), end: now };
     }
@@ -34,6 +37,7 @@ const getDateRange = (filter: string): { start: Date; end: Date } => {
 
 
 
+// build a readable booking object from the raw entity and its loaded relations
 const formatBooking = (b: Booking) => ({
     bookingId: b.bookingId,
     userId: b.user?.userId,
@@ -84,7 +88,7 @@ export class BookingController {
                 .andWhere("booking.dateSubmitted <= :end", { end })
                 .getMany();
 
-            // Chart 1 & 2: per-venue hirer tallies
+            // group bookings by venue then tally how many times each hirer appears
             const venueMap = new Map<number, { venueId: number; venueName: string; hirers: Map<number, { hirerId: number; hirerName: string; count: number }> }>();
             for (const v of venues) {
                 venueMap.set(v.venueId, { venueId: v.venueId, venueName: v.name, hirers: new Map() });
@@ -126,7 +130,7 @@ export class BookingController {
             }
             const totalPerHirer = Array.from(hirerTotals.values()).sort((a, b) => b.total - a.total);
 
-            // Chart 4: utilization over time (bookings grouped by date)
+            // group bookings by submission date for the utilization line chart
             const dateMap = new Map<string, number>();
             for (const b of bookings) {
                 const dateKey = new Date(b.dateSubmitted).toISOString().split('T')[0];
@@ -155,6 +159,7 @@ export class BookingController {
 
         try {
 
+            // find or create the pending status row so new bookings always have a status
             let pendingStatus = await statusRepo().findOne({ where: { statusName: 'Pending' } });
             if (!pendingStatus) {
                 pendingStatus = await statusRepo().save(statusRepo().create({ statusName: 'Pending' }));

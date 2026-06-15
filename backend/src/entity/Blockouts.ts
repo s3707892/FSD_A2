@@ -1,3 +1,4 @@
+// represents a date range where a venue is blocked and unavailable for booking
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToOne, JoinColumn } from "typeorm"
 import { Venue } from "./Venue"
 

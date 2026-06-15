@@ -1,3 +1,4 @@
+// the main user account entity shared by hirers, vendors and admins
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, OneToMany, OneToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { Role } from "./Role"
 import { Shortlist } from "./Shortlist"

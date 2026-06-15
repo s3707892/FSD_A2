@@ -98,7 +98,7 @@ const SignIn = () => {
                  type="button" 
                  onClick={() => setShowPassword(v => !v)}
                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">
-                 {showPassword ? '🙈' : '👁'}
+                 {showPassword ? 'Hide' : 'Show'}
               </button>
              </div>
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}

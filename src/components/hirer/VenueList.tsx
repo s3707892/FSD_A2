@@ -64,6 +64,7 @@ const VenueList = ({
     }
   };
 
+  // apply all active filters and return only the matching venues
   const filtered = useMemo(() => venues.filter(v => {
     const location = `${v.suburb} ${v.state || ''}`.toLowerCase();
     const matchSearch = v.name.toLowerCase().includes(search.toLowerCase());
@@ -73,6 +74,7 @@ const VenueList = ({
     return matchSearch && matchLocation && matchCapacity && matchSuitability;
   }), [venues, search, locationFilter, capacityFilter, suitabilityFilter]);
 
+  // separate featured venues so they appear in a highlighted section at the top
   const featuredVenues = useMemo(() => venues.filter(v => v.featured), [venues]);
 
   if (!currentUser) return <p className="text-center text-gray-500 py-10">Please sign in to browse venues.</p>;

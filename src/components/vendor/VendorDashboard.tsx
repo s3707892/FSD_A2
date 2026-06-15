@@ -9,16 +9,17 @@ import { getBookings, updateBookingStatus, ApiBooking } from '../../api/Booking'
 
 
 const TABS = [
-  { id: 'applications', label: '📋 Applications' },
-  { id: 'venues', label: '🏛 My Venues' },
-  { id: 'chart', label: '📊 Analytics' },
-  { id: 'block', label: '🚫 Blockouts' },
+  { id: 'applications', label: 'Applications' },
+  { id: 'venues', label: 'My Venues' },
+  { id: 'chart', label: 'Analytics' },
+  { id: 'block', label: 'Blockouts' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
 
 
 
+// score out of 5 based on which compliance documents the hirer submitted
 const complianceScore = (b: ApiBooking): number => {
   let score = 0;
   if (b.abn?.length === 10) score++;
@@ -28,6 +29,7 @@ const complianceScore = (b: ApiBooking): number => {
   return Math.min(score, 5);
 };
 
+// decode a base64 document and open it in a new browser tab
 const openBase64 = (data: string, type: string) => {
   try {
     const base64Data = data.split(',')[1];
@@ -62,6 +64,7 @@ const VendorDashboard = ()  => {
     loadBookings();
   }, [currentUser]);
 
+  // update local booking list immediately after status change to avoid refetching
   const updateStatus = async (bookingId: number, statusName: string) => {
     const success = await updateBookingStatus(bookingId, statusName);
     if (success) {
@@ -72,6 +75,7 @@ const VendorDashboard = ()  => {
 
   const getReputation = (b: ApiBooking): number => b.review?.rating || 0;
 
+  // sort bookings by date or hirer reputation depending on the selected sort option
   const sorted = [...bookings].sort((a, b) => {
     const diff = sortBy === 'reputation'
       ? getReputation(b) - getReputation(a)
@@ -124,7 +128,6 @@ const VendorDashboard = ()  => {
 
               {sorted.length === 0 ? (
                 <div className="text-center py-16 text-gray-400">
-                  <p className="text-4xl mb-3">📭</p>
                   <p>No booking applications yet.</p>
                 </div>
               ) : (
@@ -150,7 +153,7 @@ const VendorDashboard = ()  => {
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-gray-500">Compliance:</span>
-                              <span className="text-xs font-medium text-indigo-700">{'⭐'.repeat(compliance) || '☆☆☆☆☆'} ({compliance}/5)</span>
+                              <span className="text-xs font-medium text-indigo-700">{'★'.repeat(compliance) || '☆☆☆☆☆'} ({compliance}/5)</span>
                             </div>
                           </div>
                         </div>
@@ -169,19 +172,19 @@ const VendorDashboard = ()  => {
                               {app.licensePhoto && (
                                 <button onClick={() => openBase64(app.licensePhoto, 'image/jpeg')}
                                   className="text-xs bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100">
-                                  🪪 View Driver's License
+                                  View Driver's License
                                 </button>
                               )}
                               {app.liabilityDoc && (
                                 <button onClick={() => openBase64(app.liabilityDoc, 'application/pdf')}
                                   className="text-xs bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100">
-                                  📄 View Liability Insurance
+                                  View Liability Insurance
                                 </button>
                               )}
                               {app.abnDoc && (
                                 <button onClick={() => openBase64(app.abnDoc, 'application/pdf')}
                                   className="text-xs bg-purple-50 border border-purple-200 text-purple-700 px-3 py-1.5 rounded-lg hover:bg-purple-100">
-                                  🏢 View ABN Certificate
+                                  View ABN Certificate
                                 </button>
                               )}
                             </div>
@@ -200,7 +203,7 @@ const VendorDashboard = ()  => {
                           <div className="flex gap-3">
                             <button onClick={() => updateStatus(app.bookingId, 'Approved')}
                               className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors">
-                              ✓ Approve
+                              Approve
                             </button>
                             <button onClick={() => updateStatus(app.bookingId, 'Rejected')}
                               className="bg-red-50 hover:bg-red-100 text-red-700 text-sm font-medium px-5 py-2 rounded-lg transition-colors">

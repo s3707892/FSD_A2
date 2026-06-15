@@ -1,3 +1,4 @@
+// lets vendors block date ranges for their venues to mark them as unavailable
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import Toast from '../shared/Toast';
@@ -113,7 +114,7 @@ const VenueBlocker = () => {
         </div>
 
         <button onClick={handleBlock} className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-colors">
-          🚫 Block Timeslot
+          Block Timeslot
         </button>
       </div>
 
@@ -133,7 +134,7 @@ const VenueBlocker = () => {
                 </div>
                 <button onClick={() => handleUnblock(b.blockoutId, b.venueName)}
                   className="bg-white border border-gray-200 hover:bg-green-50 hover:border-green-300 text-gray-700 hover:text-green-700 text-xs font-medium px-4 py-2 rounded-lg transition-colors">
-                  ✓ Unblock
+                  Unblock
                 </button>
               </div>
             ))}

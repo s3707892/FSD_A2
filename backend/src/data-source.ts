@@ -1,3 +1,4 @@
+// connects to the aws rds mssql instance using hardcoded credentials
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./entity/User";

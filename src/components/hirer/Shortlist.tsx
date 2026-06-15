@@ -24,12 +24,14 @@ const Shortlist = ({ setActiveTab, setSelectedVenueId }: ShortlistProps) => {
       getVenues(),
     ]).then(([shortlist, venues]) => {
       setItems(shortlist || []);
+      // build a lookup map so each venue can be found quickly by id
       const map: Record<number, ApiVenue> = {};
       venues.forEach((v: ApiVenue) => { map[v.venueId] = v; });
       setVenueMap(map);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [currentUser]);
+  // reload shortlist and venue data after any move or remove action
   const refresh = async () => {
     if (!currentUser) return;
     try {

@@ -1,3 +1,4 @@
+// lets a hirer view and edit their personal profile details
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { validateName, validatePhone } from '../../utils/validation';

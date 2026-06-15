@@ -1,3 +1,4 @@
+// stores australian state names referenced by venue addresses
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from "typeorm"
 import { Venue } from "./Venue"
 

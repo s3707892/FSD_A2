@@ -21,6 +21,7 @@
     "jsx": "react-jsx",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "types": ["node"]
   },
   "include": [
     "src"

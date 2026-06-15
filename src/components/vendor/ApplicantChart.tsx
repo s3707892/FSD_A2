@@ -1,3 +1,4 @@
+// shows vendor booking analytics as bar, stacked bar, pie and line charts
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -20,10 +21,10 @@ interface StatsData {
 const PALETTE = ['#6366f1','#f59e0b','#10b981','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
 const TIME_LABELS: Record<TimeFilter, string> = { week: 'This Week', month: 'This Month', lastmonth: 'Last Month', all: 'All Time' };
 const CHART_TABS: { id: ChartTab; label: string }[] = [
-  { id: 'bar', label: '📊 Bar (per venue)' },
-  { id: 'stacked', label: '📈 Stacked Bar (total)' },
-  { id: 'pie', label: '🥧 Pie (activity)' },
-  { id: 'line', label: '📉 Line (utilization)' },
+  { id: 'bar', label: 'Bar (per venue)' },
+  { id: 'stacked', label: 'Stacked Bar (total)' },
+  { id: 'pie', label: 'Pie (activity)' },
+  { id: 'line', label: 'Line (utilization)' },
 ];
 
 const ApplicantChart = () => {
@@ -81,7 +82,6 @@ const ApplicantChart = () => {
 
       {isEmpty ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center text-gray-400">
-          <p className="text-4xl mb-3">📭</p>
           <p>No booking data for {TIME_LABELS[filter].toLowerCase()}.</p>
         </div>
       ) : (

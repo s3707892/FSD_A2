@@ -1,3 +1,4 @@
+// function to sign in a user and return their profile data from the api
 import api from './Client';
 import { User } from '../types';
 

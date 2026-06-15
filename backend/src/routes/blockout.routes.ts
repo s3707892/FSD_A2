@@ -1,3 +1,4 @@
+// api routes for creating, fetching and deleting venue blockout date ranges
 import { Router } from "express";
 import { BlockoutsController } from "../controller/BlockoutsController";
 

@@ -1,3 +1,4 @@
+// api routes for venue crud operations including create, update and soft delete
 import { Router } from "express";
 import { VenueController } from "../controller/VenueController";
 

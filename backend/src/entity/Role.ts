@@ -1,3 +1,4 @@
+// defines user roles such as hirer, vendor or admin used for access control
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToOne } from "typeorm"
 import { User } from "./User"
 

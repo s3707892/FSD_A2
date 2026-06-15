@@ -1,3 +1,4 @@
+// join table that links venues to their suitability tags
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToOne, PrimaryColumn, JoinColumn } from "typeorm"
 import { Venue } from "./Venue"
 import { Suitability } from "./Suitability"

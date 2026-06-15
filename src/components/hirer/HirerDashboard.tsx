@@ -6,10 +6,10 @@ import Shortlist from './Shortlist';
 
 // define tab for the hirer dashboard navigation
 const TABS = [
-  { id: 'venues', label: '🏛 Venues' },
-  { id: 'apply', label: '📋 Apply' },
-  { id: 'history', label: '⭐ History' },
-  { id: 'shortlist', label: '👍 Shortlist' },
+  { id: 'venues', label: 'Venues' },
+  { id: 'apply', label: 'Apply' },
+  { id: 'history', label: 'History' },
+  { id: 'shortlist', label: 'Shortlist' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -21,18 +21,8 @@ const HirerDashboard = () => {
 
   const prevTabRef = useRef<TabId>('venues');
 
-  // clear uploaded files when leaving apply tab
   useEffect(() => {
-    const leavingApply = prevTabRef.current === 'apply';
-    const enteringApply = activeTab === 'apply';
-
-    if (leavingApply || enteringApply) {
-      localStorage.removeItem('licenseFile');
-      localStorage.removeItem('liabilityFile');
-      localStorage.removeItem('abnFile');
-    }
-
-     prevTabRef.current = activeTab;
+    prevTabRef.current = activeTab;
   }, [activeTab]);
 
   return (

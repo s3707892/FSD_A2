@@ -1,3 +1,4 @@
+// card component showing venue details with shortlist and apply buttons
 import { ApiVenue } from '../../api/Venue';
 
 type TabId = 'venues' | 'apply' | 'history' | 'shortlist';
@@ -47,7 +48,7 @@ const VenueCard = ({ venue, isShortlisted, onToggleShortlist, setActiveTab, setS
           <h3 className="font-semibold text-gray-900 text-sm">{venue.name}</h3>
           <span className="text-xs text-gray-500">${venue.hourlyPrice}/hr</span>
         </div>
-        <p className="text-xs text-gray-500 mb-2">📍 {location} · 👥 Up to {venue.capacity.toLocaleString()}</p>
+        <p className="text-xs text-gray-500 mb-2">{location} · Up to {venue.capacity.toLocaleString()} guests</p>
         <p className="text-xs text-gray-600 mb-3 line-clamp-2">{venue.description}</p>
         <div className="flex flex-wrap gap-1 mb-4">
           {venue.suitabilities.map(s => (
@@ -57,7 +58,7 @@ const VenueCard = ({ venue, isShortlisted, onToggleShortlist, setActiveTab, setS
         <div className="flex gap-2">
           <button onClick={() => { setSelectedVenueId(String(venue.venueId)); setActiveTab('apply'); }} disabled={blocked}
             className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${blocked ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'}`}>
-            {blocked ? 'Unavailable' : '📋 Apply Now'}
+            {blocked ? 'Unavailable' : 'Apply Now'}
           </button>
           <button onClick={() => !blocked && onToggleShortlist()} disabled={blocked}
             className={`flex-1 text-sm font-medium py-2 rounded-lg transition-colors ${blocked ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : isShortlisted ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' : 'bg-indigo-700 text-white hover:bg-indigo-800'}`}>

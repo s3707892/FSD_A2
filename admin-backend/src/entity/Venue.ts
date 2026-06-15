@@ -1,3 +1,4 @@
+// represents a venue with address, pricing and availability details
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from './User';
 import { State } from './State';

@@ -1,3 +1,4 @@
+// entry point for the admin graphql server using apollo and express
 import 'reflect-metadata';
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -12,12 +13,14 @@ import { resolvers } from './resolvers';
 const PORT = process.env.PORT || 4000;
 
 async function main() {
+  // wait for the database to be ready before accepting requests
   await AppDataSource.initialize();
   console.log('Database connected');
 
   const app = express();
   app.use(cors());
 
+  // pass a basic isAdmin flag through context using the authorization header
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -28,6 +31,7 @@ async function main() {
   });
 
   await server.start();
+  // expose the graphql playground and api at /graphql
   server.applyMiddleware({ app: app as any, path: '/graphql' });
 
   app.listen(PORT, () => {

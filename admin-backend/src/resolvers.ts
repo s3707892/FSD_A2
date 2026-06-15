@@ -1,8 +1,10 @@
+// handles all graphql queries and mutations using typeorm repositories
 import { AppDataSource } from './data-source';
 import { Venue } from './entity/Venue';
 import { User } from './entity/User';
 import { Booking } from './entity/Booking';
 
+// shorthand repo getters so we don't repeat AppDataSource.getRepository everywhere
 const venueRepo = () => AppDataSource.getRepository(Venue);
 const userRepo = () => AppDataSource.getRepository(User);
 const bookingRepo = () => AppDataSource.getRepository(Booking);
@@ -11,6 +13,7 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 
 export const resolvers = {
   Query: {
+    // get all venues and attach vendor email from the linked user
     venues: async () => {
       const venues = await venueRepo().find({ relations: ['user'] });
       return venues.map(v => ({
@@ -19,19 +22,23 @@ export const resolvers = {
       }));
     },
 
+    // get a single venue by id with its vendor email
     venue: async (_: any, { venueId }: { venueId: number }) => {
       const v = await venueRepo().findOne({ where: { venueId }, relations: ['user'] });
       if (!v) return null;
       return { ...v, vendorEmail: v.user?.email || null };
     },
 
+    // get all users with roleId 2 which means they are vendors
     vendors: async () => {
       return userRepo().find({ where: { roleId: 2 } });
     },
 
+    // find the top 3 venues ranked by total booking count
     topVenues: async () => {
       const bookings = await bookingRepo().find({ relations: ['venue', 'bookingStatus'] });
 
+      // group bookings by venue and collect their start datetimes
       const venueMap = new Map<number, { name: string; bookings: Date[] }>();
       for (const b of bookings) {
         if (!b.venue) continue;
@@ -42,6 +49,7 @@ export const resolvers = {
       }
 
       const results = Array.from(venueMap.entries()).map(([venueId, data]) => {
+        // count how many bookings fall on each day and hour
         const dayCounts = new Map<number, number>();
         const hourCounts = new Map<number, number>();
 
@@ -52,6 +60,7 @@ export const resolvers = {
           hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
         }
 
+        // pick the day and hour with the highest count
         const popularDay = [...dayCounts.entries()].sort((a, b) => b[1] - a[1])[0];
         const popularHour = [...hourCounts.entries()].sort((a, b) => b[1] - a[1])[0];
 
@@ -68,12 +77,15 @@ export const resolvers = {
         };
       });
 
+      // return only the top 3 sorted by booking count descending
       return results.sort((a, b) => b.bookingCount - a.bookingCount).slice(0, 3);
     },
 
+    // find the top 3 hirers by total applications submitted
     topApplicants: async () => {
       const bookings = await bookingRepo().find({ relations: ['user', 'bookingStatus'] });
 
+      // tally total and approved bookings per user
       const userMap = new Map<number, { email: string; total: number; successful: number }>();
       for (const b of bookings) {
         if (!b.user) continue;
@@ -98,6 +110,7 @@ export const resolvers = {
   },
 
   Mutation: {
+    // create a new venue defaulting active to true and featured to false
     createVenue: async (_: any, args: any) => {
       const venue = venueRepo().create({
         name: args.name,
@@ -115,6 +128,7 @@ export const resolvers = {
       return venueRepo().save(venue);
     },
 
+    // merge only the provided fields so unset args are ignored
     updateVenue: async (_: any, args: any) => {
       const venue = await venueRepo().findOne({ where: { venueId: args.venueId } });
       if (!venue) return null;
@@ -132,20 +146,36 @@ export const resolvers = {
       return venueRepo().save(venue);
     },
 
+    // hard delete the venue row from the database
     deleteVenue: async (_: any, { venueId }: { venueId: number }) => {
       await venueRepo().delete({ venueId });
       return true;
     },
 
+    // link an existing vendor user to an existing venue
     assignVendor: async (_: any, { venueId, userId }: { venueId: number; userId: number }) => {
-      const venue = await venueRepo().findOne({ where: { venueId }, relations: ['user'] });
+      const venue = await venueRepo().findOne({
+        where: { venueId },
+        relations: ['user'],
+      });
+
       if (!venue) return null;
-      venue.userId = userId;
-      const saved = await venueRepo().save(venue);
+
       const user = await userRepo().findOne({ where: { userId } });
-      return { ...saved, vendorEmail: user?.email || null };
+      if (!user) return null;
+
+      venue.user = user;
+
+      const saved = await venueRepo().save(venue);
+
+      // return the saved venue with vendor email attached
+      return {
+        ...saved,
+        vendorEmail: user.email,
+      };
     },
 
+    // toggle the featured flag on a venue
     setFeatured: async (_: any, { venueId, featured }: { venueId: number; featured: boolean }) => {
       const venue = await venueRepo().findOne({ where: { venueId } });
       if (!venue) return null;

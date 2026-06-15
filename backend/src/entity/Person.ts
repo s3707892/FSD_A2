@@ -1,3 +1,4 @@
+// stores first and last name details for hirer accounts linked one to one with user
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, OneToMany, JoinColumn, PrimaryColumn, OneToOne } from "typeorm"
 import { User } from "./User";
 

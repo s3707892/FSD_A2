@@ -1,3 +1,4 @@
+// function to fetch all available suitability event type options from the api
 import api from './Client';
 
 export interface Suitability {

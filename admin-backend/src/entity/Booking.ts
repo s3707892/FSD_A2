@@ -1,3 +1,4 @@
+// represents a booking record linked to a user, venue and status
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { Venue } from './Venue';
 import { User } from './User';

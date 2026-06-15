@@ -1,3 +1,4 @@
+// form for hirers to apply for a venue booking with optional compliance documents
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { validateRequired, validateExpectedGuests, validateFutureDate, validateDuration, validateABN } from '../../utils/validation';
@@ -213,7 +214,7 @@ const ApplicationForm = ({ selectedVenueId }: { selectedVenueId?: string }) => {
         )}
 
         <br /><hr />
-        <p className="text-sm">Current Compliance Rating: {['☆☆☆☆☆','⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐⭐'][stars]}</p>
+        <p className="text-sm">Current Compliance Rating: {['☆☆☆☆☆','★☆☆☆☆','★★☆☆☆','★★★☆☆','★★★★☆','★★★★★'][stars]}</p>
         <hr /><br />
         <button type="submit" disabled={loading} data-testid="submit-btn" className="w-full bg-indigo-700 hover:bg-indigo-800 disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors">
           {loading ? 'Submitting...' : 'Submit Application'}

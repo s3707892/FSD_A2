@@ -1,3 +1,4 @@
+// stores event type keywords that venues can be tagged with for filtering
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToOne } from "typeorm"
 import { VenueSuitability } from "./VenueSuitability"
 

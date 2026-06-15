@@ -1,3 +1,4 @@
+// stores australian state names used for venue addresses
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('State')

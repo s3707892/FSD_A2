@@ -1,3 +1,4 @@
+// bootstraps the react app and renders the root component into the dom
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';

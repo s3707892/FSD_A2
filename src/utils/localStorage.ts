@@ -1,3 +1,4 @@
+// helpers to get and set the current logged in user in localstorage
 import { User } from '../types';
 
 const CURRENT_USER_KEY = 'vv_current_user';

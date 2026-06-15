@@ -1,13 +1,11 @@
+// lets vendors create, edit and deactivate their venues with suitability and image support
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import Toast from '../shared/Toast';
-import { ApiVenue } from '../../api/Venue';
+import { ApiVenue, getVendorVenues, getStates, getSuitabilityOptions, deleteVenue, saveVenue } from '../../api/Venue';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:3002/api';
 
-const SUITABILITY_OPTIONS = ['wedding', 'birthday', 'corporate', 'conference', 'concert', 'exhibition', 'dinner', 'tennis', 'rock concert', 'classical music'];
-const STATES = ['VIC', 'NSW', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'];
-const STATE_ID_MAP: Record<string, number> = { NSW: 8, VIC: 9, QLD: 10, WA: 11, SA: 12, TAS: 13, ACT: 14, NT: 15 };
+
 
 const emptyForm = { name: '', addressLine1: '', addressLine2: '', suburb: '', postcode: '', state: '', capacity: '', description: '', hourlyPrice: '', imageUrl: '', suitabilityNames: [] as string[] };
 
@@ -21,16 +19,30 @@ const VenueManager = () => {
   const [errors, setErrors] = useState<Partial<typeof emptyForm>>({});
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [states, setStates] = useState<{ stateId: number; state: string }[]>([]);
+  const [suitabilityOptions, setSuitabilityOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    getStates().then(setStates).catch(() => {});
+    getSuitabilityOptions().then(setSuitabilityOptions).catch(() => {});
+  }, []);
+
+
 
   const loadVenues = () => {
     if (!currentUser) return;
-    fetch(`${API}/venues/vendor/${currentUser.id}`)
-      .then(r => r.json())
-      .then(data => { setVenues(Array.isArray(data) ? data : []); setLoading(false); })
+
+    getVendorVenues(currentUser.id)
+      .then(data => {
+        setVenues(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   };
 
-  useEffect(() => { loadVenues(); }, [currentUser]);
+  useEffect(() => {
+    loadVenues();
+  }, [currentUser]);
 
   const openCreate = () => {
     setEditVenue(null);
@@ -74,32 +86,36 @@ const VenueManager = () => {
   const handleSave = async () => {
     if (!validate() || !currentUser) return;
     setSaving(true);
+
     try {
-      const body = { ...form, vendorId: currentUser.id, stateId: STATE_ID_MAP[form.state] };
-      const url = editVenue ? `${API}/venues/${editVenue.venueId}` : `${API}/venues`;
-      const method = editVenue ? 'PUT' : 'POST';
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+      const stateId = states.find(s => s.state === form.state)?.stateId;
+      const body = { ...form, vendorId: currentUser.id, stateId };
+
+      await saveVenue(body, editVenue?.venueId);
+
+      setToast({
+        msg: editVenue ? "Venue updated!" : "Venue created!",
+        type: "success"
       });
-      if (!res.ok) throw new Error('Save failed');
-      setToast({ msg: editVenue ? 'Venue updated!' : 'Venue created!', type: 'success' });
+
       setShowForm(false);
       loadVenues();
     } catch {
-      setToast({ msg: 'Failed to save venue.', type: 'error' });
+      setToast({ msg: "Failed to save venue.", type: "error" });
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (venueId: number) => {
-    if (!window.confirm('Deactivate this venue?')) return;
-    const res = await fetch(`${API}/venues/${venueId}`, { method: 'DELETE' });
-    if (res.ok) {
-      setToast({ msg: 'Venue deactivated.', type: 'success' });
+    if (!window.confirm("Deactivate this venue?")) return;
+
+    try {
+      await deleteVenue(venueId);
+      setToast({ msg: "Venue deactivated.", type: "success" });
       loadVenues();
+    } catch {
+      setToast({ msg: "Failed to deactivate venue.", type: "error" });
     }
   };
 
@@ -130,7 +146,6 @@ const VenueManager = () => {
 
       {venues.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-4xl mb-3">🏛</p>
           <p>No venues yet. Create your first venue!</p>
         </div>
       ) : (
@@ -143,7 +158,7 @@ const VenueManager = () => {
                   <h3 className="font-semibold text-gray-900 text-sm">{v.name}</h3>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${v.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>{v.active ? 'Active' : 'Inactive'}</span>
                 </div>
-                <p className="text-xs text-gray-500 mb-1">📍 {v.suburb}{v.state ? ', ' + v.state : ''} · 👥 {v.capacity}</p>
+                <p className="text-xs text-gray-500 mb-1">{v.suburb}{v.state ? ', ' + v.state : ''} · {v.capacity} guests</p>
                 <p className="text-xs text-gray-500 mb-3">${v.hourlyPrice}/hr</p>
                 <div className="flex flex-wrap gap-1 mb-3">
                   {v.suitabilities.map(s => <span key={s} className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">{s}</span>)}
@@ -192,7 +207,7 @@ const VenueManager = () => {
                   <label className="block text-xs font-medium text-gray-500 mb-1">State</label>
                   <select value={form.state} onChange={e => setForm(p => ({ ...p, state: e.target.value }))} className={inputCls('state') + ' bg-white'}>
                     <option value="">Select state</option>
-                    {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    {states.map(s => <option key={s.state} value={s.state}>{s.state}</option>)}
                   </select>
                 </div>
                 <div>
@@ -217,7 +232,7 @@ const VenueManager = () => {
                 <div className="col-span-2">
                   <label className="block text-xs font-medium text-gray-500 mb-2">Suitability Keywords</label>
                   <div className="flex flex-wrap gap-2">
-                    {SUITABILITY_OPTIONS.map(s => (
+                    {suitabilityOptions.map((s: string) => (
                       <button key={s} type="button" onClick={() => toggleSuitability(s)}
                         className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${form.suitabilityNames.includes(s) ? 'bg-indigo-700 text-white border-indigo-700' : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'}`}>
                         {s}

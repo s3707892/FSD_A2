@@ -1,3 +1,4 @@
+// handles venue crud operations including suitability and image management
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Venue } from "../entity/Venue";
@@ -10,6 +11,7 @@ const suitabilityRepo = () => AppDataSource.getRepository(Suitability);
 const venueSuitabilityRepo = () => AppDataSource.getRepository(VenueSuitability);
 const imageRepo = () => AppDataSource.getRepository(Image);
 
+// build a flat response object from the raw venue entity and its relations
 const formatVenue = (v: Venue) => ({
     venueId: v.venueId,
     name: v.name,
@@ -25,7 +27,9 @@ const formatVenue = (v: Venue) => ({
     active: v.active,
     featured: v.featured || false,
     vendorId: v.userId || null,
+    // extract suitability names and filter out any nulls
     suitabilities: (v.venueSuitabilities || []).map(vs => vs.suitability?.name).filter(Boolean),
+    // use the first image if there are multiple
     imageUrl: (v.images && v.images.length > 0) ? v.images[0].path : null,
     blockouts: (v.blockouts || []).map(b => ({
         blockoutId: b.blockoutId,
@@ -38,6 +42,7 @@ export class VenueController {
 
     async getAll(req: Request, res: Response) {
         try {
+            // only return venues with active flag set to true for the hirer listing
             const venues = await venueRepo().find({
                 relations: ["state", "venueSuitabilities", "venueSuitabilities.suitability", "images", "blockouts"],
                 where: { active: true },
@@ -148,6 +153,7 @@ export class VenueController {
 
             await venueRepo().save(venue);
 
+            // wipe old suitability links then re-add the updated ones
             if (Array.isArray(suitabilityNames)) {
                 await venueSuitabilityRepo().delete({ venueId });
                 for (const n of suitabilityNames) {
@@ -176,6 +182,7 @@ export class VenueController {
             const venueId = parseInt(req.params.id);
             const venue = await venueRepo().findOne({ where: { venueId } });
             if (!venue) return res.status(404).json({ error: "Venue not found" });
+            // soft delete by setting active to false instead of deleting the row
             venue.active = false;
             await venueRepo().save(venue);
             return res.json({ message: "Venue deactivated" });

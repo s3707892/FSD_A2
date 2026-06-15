@@ -1,3 +1,4 @@
+// returns all available suitability event type options from the database
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Suitability } from "../entity/Suitability";

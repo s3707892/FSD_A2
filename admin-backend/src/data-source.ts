@@ -1,3 +1,4 @@
+// sets up the typeorm connection to the mssql database using env variables
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { Venue } from './entity/Venue';

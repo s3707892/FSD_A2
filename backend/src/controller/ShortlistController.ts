@@ -1,3 +1,4 @@
+// handles adding, removing and reordering venues in a hirer shortlist
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
@@ -35,6 +36,7 @@ export class ShortlistController {
                     order: { ranking: 'ASC' },
                 });
 
+                // re-index rankings sequentially so there are no gaps after deletion
                 for (let index = 0; index < remainingItems.length; index += 1) {
                     const item = remainingItems[index];
                     if (item.ranking !== index) {
@@ -94,10 +96,11 @@ export class ShortlistController {
                 if (!targetItem) throw new Error("Target item not found");
                 
                 
+                // swap the two rankings to move this item one position up
                 [item.ranking, targetItem.ranking] = [targetItem.ranking, item.ranking];
                 await transactionalEntityManager.save([item, targetItem]);
             });
-            
+
             return res.json({ message: "Moved up" });
         } catch (err) {
             console.error(err);
@@ -125,10 +128,11 @@ export class ShortlistController {
                 if (!targetItem) throw new Error("Already at bottom");
                 
                 
+                // swap the two rankings to move this item one position down
                 [item.ranking, targetItem.ranking] = [targetItem.ranking, item.ranking];
                 await transactionalEntityManager.save([item, targetItem]);
             });
-            
+
             return res.json({ message: "Moved down" });
         } catch (err) {
             console.error(err);

@@ -1,3 +1,4 @@
+// functions to create bookings, fetch vendor bookings and update booking status via api
 import api from './Client';
 import { ApiVenue } from './Venue';
 
@@ -45,6 +46,7 @@ export const createBooking = async (payload: CreateBookingPayload): Promise<bool
   }
 };
 
+// fetch bookings for all venues owned by this vendor user
 export const getBookings = async (userId: number): Promise<ApiBooking[]> => {
   try {
     const response = await api.get(`/bookings/vendor/${userId}`);

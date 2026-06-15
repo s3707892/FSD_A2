@@ -15,11 +15,13 @@ const SignUp = () => {
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // update a single form field and clear its error at the same time
   const set = (field: keyof typeof form, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setErrors(prev => ({ ...prev, [field]: undefined, form: undefined }));
   };
 
+  // collect all field errors before deciding whether to submit
   const validate = (): boolean => {
     const e: typeof errors = {};
     const emailErr = validateEmail(form.email);
@@ -50,6 +52,7 @@ const SignUp = () => {
     if (!validate()) return;
     setLoading(true);
     try {
+      // build request body from form state then add role-specific fields
       const body: Record<string, any> = {
         email: form.email,
         password: form.password,
@@ -59,7 +62,7 @@ const SignUp = () => {
       if (role === 'hirer') { body.firstName = form.firstName; body.lastName = form.lastName; }
       else { body.businessName = form.businessName; }
 
-      const res = await fetch(`${API}/api/users`, {
+      const res = await fetch(`${API}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -139,7 +142,7 @@ const SignUp = () => {
             <label className="block text-xs font-medium text-gray-700 mb-1">Password *</label>
             <div className="relative">
               <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)} className={inputClass('password') + ' pr-12'} placeholder="Min 6 chars, 1 upper, 1 lower, 1 special" />
-              <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">{showPassword ? '🙈' : '👁'}</button>
+              <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">{showPassword ? 'Hide' : 'Show'}</button>
             </div>
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
           </div>
@@ -148,7 +151,7 @@ const SignUp = () => {
             <label className="block text-xs font-medium text-gray-700 mb-1">Confirm Password *</label>
             <div className="relative">
               <input type={showConfirm ? 'text' : 'password'} value={form.confirmPassword} onChange={e => set('confirmPassword', e.target.value)} className={inputClass('confirmPassword') + ' pr-12'} placeholder="Re-enter your password" />
-              <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">{showConfirm ? '🙈' : '👁'}</button>
+              <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm">{showConfirm ? 'Hide' : 'Show'}</button>
             </div>
             {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
           </div>

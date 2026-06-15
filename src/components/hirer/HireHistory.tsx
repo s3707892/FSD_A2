@@ -1,3 +1,4 @@
+// shows a hirer their past bookings and lets them leave a star rating and comment
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import StarRating from '../shared/StarRating';

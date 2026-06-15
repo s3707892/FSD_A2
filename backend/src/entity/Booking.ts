@@ -1,3 +1,4 @@
+// represents a booking submitted by a hirer for a specific venue
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany, ManyToOne, CreateDateColumn, OneToOne, JoinColumn } from "typeorm"
 import { Venue } from "./Venue"
 import { User } from "./User"

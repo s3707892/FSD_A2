@@ -1,3 +1,4 @@
+// stores business name details for vendor accounts linked one to one with user
 import { Entity, Column, BaseEntity, JoinColumn, PrimaryColumn, OneToOne } from "typeorm"
 import { User } from "./User";
 

@@ -1,3 +1,4 @@
+// stores image file paths linked to a venue for display purposes
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColumn } from "typeorm"
 import { Venue } from "./Venue"
 
