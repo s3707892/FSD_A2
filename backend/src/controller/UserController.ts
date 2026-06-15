@@ -1,12 +1,16 @@
+// handles user registration, login and profile updates with validation
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
 import { Person } from "../entity/Person";
 import { Vendor } from "../entity/Vendor";
+import bcrypt from 'bcrypt';
 
+// regex patterns used to validate email and australian phone numbers
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegex = /^(\+?61|0)[2-478](\s?\d){8}$/;
 
+// validate password strength and return an error message or null if valid
 const validatePassword = (pw: string): string | null => {
     if (!pw || pw.length < 6) return 'Password must be at least 6 characters.';
     if (!/[A-Z]/.test(pw)) return 'Password must contain an uppercase letter.';
@@ -36,12 +40,24 @@ export class UserController {
         if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
 
         try {
+            // find user by email only then verify the password against the stored hash
             const user = await this.userRepository.findOne({
-                where: { email, password },
+                where: { email },
                 relations: ["person", "vendor", "role"],
             });
             if (!user) return res.status(401).json({ error: "Invalid email or password" });
 
+            // check bcrypt hash first, then fall back to plain text for legacy users
+            let passwordMatch = await bcrypt.compare(password, user.password);
+            if (!passwordMatch && password === user.password) {
+                // plain text match — upgrade to hash silently
+                user.password = await bcrypt.hash(password, 10);
+                await this.userRepository.save(user);
+                passwordMatch = true;
+            }
+            if (!passwordMatch) return res.status(401).json({ error: "Invalid email or password" });
+
+            // return a structured user object with role and profile fields
             return res.json({
                 message: "Login successful",
                 user: {
@@ -101,12 +117,16 @@ export class UserController {
             return res.status(400).json({ error: 'Business name is required for vendors.' });
 
         try {
+            // reject if email is already registered to prevent duplicates
             const existing = await this.userRepository.findOne({ where: { email } });
             if (existing) return res.status(409).json({ error: 'Email is already registered.' });
 
-            const user = this.userRepository.create({ email, password, phone, role: { roleId } });
+            // hash the password before storing it in the database
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const user = this.userRepository.create({ email, password: hashedPassword, phone, role: { roleId } });
             await this.userRepository.save(user);
 
+            // save the correct profile type based on the chosen role
             if (roleId === 1 || roleId === 3) {
                 const personRepo = AppDataSource.getRepository(Person);
                 await personRepo.save(personRepo.create({ userId: user.userId, firstName, lastName }));
